@@ -1,0 +1,7 @@
+load '~/.autotest'
+
+Autotest.add_hook :initialize do |at| 
+  at.add_mapping(/.rb$/) do |f, _|
+    at.files_matching(/^spec\/.*_spec\.rb$/)
+  end
+end

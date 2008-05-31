@@ -1,15 +1,19 @@
 #!/usr/bin/env ruby
 
+# Increase the tempo of all tracks in the 'podcasts' playlist in iTunes
+# (don't double up - running this multiple times shouldn't hurt)
+#
 # Dependencies:
-#   sudo port install soundtouch
-%w[rubygems activerecord activesupport].each {|l| require l }
+#   (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
+#   sudo port install soundtouch ruby rb-rubygems
+#   sudo gem install activerecord activesupport rb-appscript
+%w[rubygems activerecord activesupport appscript].each {|l| require l }
 
+WORKING_DIR = '/Users/matt/.podcasts'
 # Database
-ActiveRecord::Base.establish_connection(:adapter  => 'mysql',
-                                        :database => 'podcasts',
-                                        :username => 'root',
-                                        :password => '',
-                                        :host     => 'localhost')
+DB_FILE = WORKING_DIR + '/db.sqlite3'
+ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3',
+                                        :database => DB_FILE)
 
 # Database migration
 class InitializePodcastTable < ActiveRecord::Migration
@@ -25,23 +29,34 @@ class InitializePodcastTable < ActiveRecord::Migration
     end
 
     def current_version
-      ActiveRecord::Base.connection.select_value("SELECT version FROM schema_info").to_i
+      begin
+        ActiveRecord::Base.connection.select_value("SELECT version FROM schema_info").to_i
+      rescue
+        0
+      end
     end
 
-    def migrate_with_schema_changes(direction = :up)
+    def migrate_with_schema_changes_and_db(direction = :up)
+      unless File.exist?(WORKING_DIR)
+        FileUtils.mkdir_p(WORKING_DIR)
+      end
+      unless File.exist?(DB_FILE)
+        cmd = "echo '' | sqlite3 '#{DB_FILE}'"
+        puts cmd
+        puts `#{cmd}`
+      end
       unless current_version == 1
-        migrate_without_schema_changes(direction)
+        migrate_without_schema_changes_and_db(direction)
         ActiveRecord::Base.connection.update("UPDATE schema_info SET version = 1")
       end
     end
-    alias_method_chain :migrate, :schema_changes
+    alias_method_chain :migrate, :schema_changes_and_db
   end
 end
 InitializePodcastTable.migrate(:up)
 
 # Podcasts and conversion state
 class Podcast < ActiveRecord::Base
-  # export ID3 tags
   # lame --decode <mp3> <slow-wav>
   # soundstretch <slow-wav> <fast-wav> -tempo=+70
   # rm <slow-wav>
@@ -51,3 +66,6 @@ class Podcast < ActiveRecord::Base
   # mv <fast-mp3> <mp3>
   # touch iTunes db for changes
 end
+
+itunes = Appscript.app("iTunes")
+podcasts = itunes.playlists["podcasts"].tracks.get

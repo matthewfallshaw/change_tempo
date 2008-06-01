@@ -65,7 +65,34 @@ class Podcast < ActiveRecord::Base
   # id3cp <mp3> <fast-mp3>
   # mv <fast-mp3> <mp3>
   # touch iTunes db for changes
-end
+  class << self
+    def iTunes
+      @itunes ||= Appscript.app("iTunes")
+    end
+    def each_podcast
+      all_podcast_refs.each do |p|
+        yield new(p)
+      end
+    end
+    def each_slow_podcast
+      all_podcast_refs.each do |p|
+        podcast = new(p)
+        yield podcast if podcast.slow?
+      end
+    end
 
-itunes = Appscript.app("iTunes")
-podcasts = itunes.playlists["podcasts"].tracks.get
+    protected
+
+    def all_podcast_refs
+      iTunes.playlists["podcasts"].tracks.get
+    end
+  end
+
+  def initialize(podcast_ref)
+    @podcast_ref = podcast_ref
+  end
+
+  def slow?
+    @podcast_ref
+  end
+end

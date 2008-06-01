@@ -11,6 +11,7 @@
 
 class Podcast
   class << self
+    DEFAULT_PLAYLIST = "podcasts"
     def iTunes
       @itunes ||= Appscript.app("iTunes")
     end
@@ -28,17 +29,17 @@ class Podcast
     def count
       all_podcast_refs.size
     end
-    def all_podcasts
-      all_podcast_refs.collect {|p| new(p) }
+    def all_podcasts(playlist = DEFAULT_PLAYLIST)
+      all_podcast_refs(playlist).collect {|p| new(p) }
     end
-    def all_slow_podcasts
-      all_podcasts.select {|p| p.slow? }
+    def all_slow_podcasts(playlist = DEFAULT_PLAYLIST)
+      all_podcasts(playlist).select {|p| p.slow? }
     end
 
     protected
 
-    def all_podcast_refs
-      iTunes.playlists["podcasts"].tracks.get
+    def all_podcast_refs(playlist)
+      iTunes.playlists[playlist].tracks.get
     end
   end
 
@@ -165,6 +166,12 @@ class Podcast
 end
 
 if __FILE__ == $0
+  require 'optparse'
+
+  opts = OptionParser.new
+  opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any " }
+  opts.parse(ARGV)
+
   Podcast.each_slow_podcast do |p|
     p.change_tempo
   end

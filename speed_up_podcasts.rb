@@ -130,11 +130,11 @@ class Podcast
   def update_comment_with_speedup
     # update comment and ensure itunes has noticed new file
     # touch iTunes db for changes
-    new_comment = self.comment
+    new_comment = ""
     unless slow?
       raise RuntimeError, "Erm... it looks like we've just double sped up a podcast. Sorry about that."
     else
-      new_comment << "{{{change_tempo:+#{speedup}}}}"
+      new_comment = "{{{change_tempo:+#{speedup}}}}" << self.comment
     end
     self.comment = new_comment
     return new_comment
@@ -161,5 +161,11 @@ class Podcast
   def cmd(command_string)
     puts command_string
     puts `#{command_string}`
+  end
+end
+
+if __FILE__ == $0
+  Podcast.each_slow_podcast do |p|
+    p.change_tempo
   end
 end

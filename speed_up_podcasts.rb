@@ -152,7 +152,7 @@ class Podcast
   end
   def cleanup(*files)
     # rm <file>
-    files.each do |file|
+    files.compact.each do |file|
       FileUtils.rm(file) if File.exist?(file)
       FileUtils.rm(unescape_filename(file)) if File.exist?(unescape_filename(file))
     end

@@ -10,18 +10,21 @@
 %w[rubygems activesupport appscript].each {|l| require l }
 
 class Podcast
+
+  @@problems = []
+
   class << self
     DEFAULT_PLAYLIST = "podcasts"
     def iTunes
       @itunes ||= Appscript.app("iTunes")
     end
-    def each_podcast
-      all_podcast_refs.each do |p|
+    def each_podcast(playlist = DEFAULT_PLAYLIST)
+      all_podcast_refs(playlist).each do |p|
         yield new(p)
       end
     end
-    def each_slow_podcast
-      all_podcast_refs.each do |p|
+    def each_slow_podcast(playlist = DEFAULT_PLAYLIST)
+      all_podcast_refs(playlist).each do |p|
         podcast = new(p)
         yield podcast if podcast.slow?
       end
@@ -93,8 +96,11 @@ class Podcast
       copy_tags_to(fast_mp3)
       overwrite_self_with(fast_mp3)
       update_comment_with_speedup
+    rescue RuntimeError => e
+      @@problems << e
     ensure
       cleanup(slow_wav, fast_wav, fast_mp3)
+      puts @@problems.inspect unless @@problems.empty?
     end
   end
 
@@ -154,7 +160,7 @@ class Podcast
     escape_filename(Tempfile.new("#{object_id}_#{ext}").path)
   end
   def escape_filename(filename)
-    filename.gsub(/([-+ ])/,'\\\\\1')
+    filename.gsub(/(\W)/,'\\\\\1')
   end
   def unescape_filename(filename)
     filename.gsub(/\\/,'')
@@ -162,6 +168,8 @@ class Podcast
   def cmd(command_string)
     puts command_string
     puts `#{command_string}`
+    exitstatus = $?.exitstatus
+    raise(RuntimeError, $?) unless exitstatus == 0
   end
 end
 

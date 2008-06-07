@@ -75,6 +75,9 @@ class Podcast
   def safe_path
     escape_filename(path)
   end
+  def mp3?
+    File.extname(path) == ".mp3"
+  end
 
   def slow?
     not comment.match(/\{\{\{change_tempo:\+\d+\}\}\}/)
@@ -88,6 +91,7 @@ class Podcast
 
   def change_tempo(cent = self.speedup)
     begin
+      raise(RuntimeError, "Not an mp3 - aborting.") unless mp3?
       slow_wav = to_slow_wav
       fast_wav = soundstretch(slow_wav, cent)
       cleanup(slow_wav)
@@ -175,6 +179,9 @@ end
 
 if __FILE__ == $0
   require 'optparse'
+
+  # TODO: accept command line playlist or speedup
+  # TODO: accept playlist or speedup from $0.yml
 
   opts = OptionParser.new
   opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any " }

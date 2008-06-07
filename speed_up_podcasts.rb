@@ -12,28 +12,18 @@
 class Podcast
 
   @@problems = []
+  cattr_reader :problems
 
   class << self
     DEFAULT_PLAYLIST = "podcasts"
     def iTunes
       @itunes ||= Appscript.app("iTunes")
     end
-    def each_podcast(playlist = DEFAULT_PLAYLIST)
-      all_podcast_refs(playlist).each do |p|
-        yield new(p)
-      end
-    end
-    def each_slow_podcast(playlist = DEFAULT_PLAYLIST)
-      all_podcast_refs(playlist).each do |p|
-        podcast = new(p)
-        yield podcast if podcast.slow?
-      end
-    end
     def count
       all_podcast_refs.size
     end
     def all_podcasts(playlist = DEFAULT_PLAYLIST)
-      all_podcast_refs(playlist).collect {|p| new(p) }
+      all_podcast_refs(playlist).collect {|p| new(p) }.select {|p| p.mp3? }
     end
     def all_slow_podcasts(playlist = DEFAULT_PLAYLIST)
       all_podcasts(playlist).select {|p| p.slow? }
@@ -42,7 +32,7 @@ class Podcast
     protected
 
     def all_podcast_refs(playlist)
-      iTunes.playlists[playlist].tracks.get
+      iTunes.playlists[playlist].tracks.get.select {|p| p.exists }
     end
   end
 
@@ -76,9 +66,12 @@ class Podcast
     escape_filename(path)
   end
   def mp3?
-    File.extname(path) == ".mp3"
+    begin
+      File.extname(path) == ".mp3"
+    rescue Appscript::CommandError => e
+      false
+    end
   end
-
   def slow?
     not comment.match(/\{\{\{change_tempo:\+\d+\}\}\}/)
   end
@@ -92,6 +85,7 @@ class Podcast
   def change_tempo(cent = self.speedup)
     begin
       raise(RuntimeError, "Not an mp3 - aborting.") unless mp3?
+      raise(RuntimeError, "Already fast - aborting.") unless slow?
       slow_wav = to_slow_wav
       fast_wav = soundstretch(slow_wav, cent)
       cleanup(slow_wav)
@@ -104,7 +98,6 @@ class Podcast
       @@problems << e
     ensure
       cleanup(slow_wav, fast_wav, fast_mp3)
-      puts @@problems.inspect unless @@problems.empty?
     end
   end
 
@@ -187,7 +180,8 @@ if __FILE__ == $0
   opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any " }
   opts.parse(ARGV)
 
-  Podcast.each_slow_podcast do |p|
+  Podcast.all_slow_podcasts.each do |p|
     p.change_tempo
   end
+  puts Podcast.problems.inspect unless Podcast.problems.empty?
 end

@@ -22,6 +22,7 @@ class Podcast
   @@problems = []
   cattr_reader :problems
 
+  DEFAULT_SPEEDUP  = 70
   class << self
     DEFAULT_PLAYLIST = "podcasts"
     def iTunes
@@ -46,7 +47,7 @@ class Podcast
 
   # Instance methods
 
-  def initialize(podcast_ref, speedup = 70)
+  def initialize(podcast_ref, speedup = DEFAULT_SPEEDUP)
     @podcast_ref = podcast_ref
     self.speedup = speedup
   end
@@ -76,7 +77,7 @@ class Podcast
   def mp3?
     begin
       File.extname(path) == ".mp3"
-    rescue Appscript::CommandError => e
+    rescue Appscript::CommandError, AE::MacOSError => e
       false
     end
   end

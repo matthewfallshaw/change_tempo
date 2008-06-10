@@ -11,9 +11,9 @@
 #
 # === Install:
 # 
-# Put this somewhere sensible (like ~/bin/speed_up_podcasts) and run it regularly, by, say:
+# Put this somewhere sensible (like ~/bin/change_tempo) and run it regularly, by, say:
 #   crontab -e
-#   15 3 * * * ~/bin/speed_up_podcasts
+#   15 3 * * * ~/bin/change_tempo
 
 %w[rubygems activesupport appscript].each {|l| require l }
 
@@ -22,6 +22,7 @@ class Podcast
   @@problems = []
   cattr_reader :problems
 
+  DEFAULT_SPEEDUP  = 70
   class << self
     DEFAULT_PLAYLIST = "podcasts"
     def iTunes
@@ -46,7 +47,7 @@ class Podcast
 
   # Instance methods
 
-  def initialize(podcast_ref, speedup = 70)
+  def initialize(podcast_ref, speedup = DEFAULT_SPEEDUP)
     @podcast_ref = podcast_ref
     self.speedup = speedup
   end
@@ -76,7 +77,7 @@ class Podcast
   def mp3?
     begin
       File.extname(path) == ".mp3"
-    rescue Appscript::CommandError => e
+    rescue Appscript::CommandError, AE::MacOSError => e
       false
     end
   end
@@ -185,7 +186,7 @@ if __FILE__ == $0
   # TODO: accept playlist or speedup from $0.yml
 
   opts = OptionParser.new
-  opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any " }
+  opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any mp3 files in the default (or named) iTunes playlist by the default or named tempo." }
   opts.parse(ARGV)
 
   Podcast.all_slow_podcasts.each do |p|

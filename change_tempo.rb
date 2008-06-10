@@ -23,8 +23,8 @@ class Podcast
   cattr_reader :problems
   cattr_accessor :playlist, :speedup
 
-  self.speedup ||= 70
-  self.playlist ||= "podcasts"
+  self.speedup ||= 25
+  self.playlist ||= "Podcasts"
   class << self
     def iTunes
       @itunes ||= Appscript.app("iTunes")

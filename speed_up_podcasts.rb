@@ -3,10 +3,18 @@
 # Increase the tempo of all tracks in the 'podcasts' playlist in iTunes
 # (update state is stored in running this multiple times shouldn't hurt)
 #
-# Dependencies:
-#   (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
-#   sudo port install soundtouch ruby rb-rubygems
-#   sudo gem install activerecord activesupport rb-appscript
+# === Dependencies:
+#
+# * sudo port install soundtouch ruby rb-rubygems
+# ** (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
+# * sudo gem install activerecord activesupport rb-appscript
+#
+# === Install:
+# 
+# Put this somewhere sensible (like ~/bin/speed_up_podcasts) and run it regularly, by, say:
+#   crontab -e
+#   15 3 * * * ~/bin/speed_up_podcasts
+
 %w[rubygems activesupport appscript].each {|l| require l }
 
 class Podcast

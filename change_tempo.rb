@@ -21,33 +21,41 @@ class Podcast
 
   @@problems = []
   cattr_reader :problems
+  cattr_accessor :playlist, :speedup
 
-  DEFAULT_SPEEDUP  = 70
+  self.speedup ||= 70
+  self.playlist ||= "podcasts"
   class << self
-    DEFAULT_PLAYLIST = "podcasts"
     def iTunes
       @itunes ||= Appscript.app("iTunes")
     end
     def count
       all_podcast_refs.size
     end
-    def all_podcasts(playlist = DEFAULT_PLAYLIST)
+    def all_podcasts(playlist = self.playlist)
       all_podcast_refs(playlist).collect {|p| new(p) }.select {|p| p.mp3? }
     end
-    def all_slow_podcasts(playlist = DEFAULT_PLAYLIST)
+    def all_slow_podcasts(playlist = self.playlist)
       all_podcasts(playlist).select {|p| p.slow? }
+    end
+    def playlist_count
+      all_podcast_refs.size
     end
 
     protected
 
-    def all_podcast_refs(playlist)
-      iTunes.playlists[playlist].tracks.get.select {|p| p.exists }
+    def all_podcast_refs(playlist = self.playlist)
+      begin
+        iTunes.playlists[playlist].tracks.get.select {|p| p.exists }
+      rescue Appscript::CommandError
+        []
+      end
     end
   end
 
   # Instance methods
 
-  def initialize(podcast_ref, speedup = DEFAULT_SPEEDUP)
+  def initialize(podcast_ref, speedup = self.speedup)
     @podcast_ref = podcast_ref
     self.speedup = speedup
   end
@@ -85,10 +93,13 @@ class Podcast
     not comment.match(/\{\{\{change_tempo:\+\d+\}\}\}/)
   end
 
-  attr_accessor :speedup
   def speedup=(value)
-    raise(ArgumentError, "speedup should be an integer percentage above 0.") unless value.respond_to?(:to_i) && value.to_i >= 1
+    raise(ArgumentError, "speedup should be an integer percentage above 0.") unless
+      value.respond_to?(:to_i) && value.to_i >= 1
     @speedup = value.to_i
+  end
+  def speedup
+    self.class.speedup || @speedup
   end
 
   def change_tempo(cent = self.speedup)
@@ -185,9 +196,34 @@ if __FILE__ == $0
   # TODO: accept command line playlist or speedup
   # TODO: accept playlist or speedup from $0.yml
 
-  opts = OptionParser.new
-  opts.on("-h", "--help") { "Usage: #{$0}\nUpdates any mp3 files in the default (or named) iTunes playlist by the default or named tempo." }
-  opts.parse(ARGV)
+  opts = OptionParser.new do |opts|
+    opts.banner = "Usage: #$0 [options]"
+    opts.separator ""
+    opts.separator "Updates any mp3 files in the default (or named) iTunes playlist by the default or named tempo."
+    opts.separator ""
+    opts.separator "Specific options:"
+    opts.on("-p", "--playlist PLAYLIST", "Convert unconverted mp3s in PLAYLIST") do |p|
+      Podcast.playlist = p
+    end
+    opts.on("-s", "--speedup TEMPO", Integer, "Increase tempo by TEMPO (as a percentage)") do |c|
+      Podcast.speedup = c
+    end
+    opts.on_tail("-h", "--help", "Show this message") do
+      puts opts
+      exit
+    end
+
+    begin
+      opts.parse!(ARGV)
+    rescue OptionParser::InvalidOption => e
+      puts e.message
+      puts
+      puts opts
+      exit
+    end
+  end
+
+  puts "Running with playlist:#{Podcast.playlist} (#{Podcast.playlist_count} mp3s) and speedup:#{Podcast.speedup}..."
 
   Podcast.all_slow_podcasts.each do |p|
     p.change_tempo

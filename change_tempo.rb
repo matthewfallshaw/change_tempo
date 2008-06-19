@@ -1,19 +1,20 @@
 #!/usr/bin/env ruby
 
-# Increase the tempo of all tracks in the 'podcasts' playlist in iTunes
-# (update state is stored in running this multiple times shouldn't hurt)
+# Increase the tempo of all tracks in the 'Podcasts' playlist in iTunes
+# (update state is stored in the mp3 'comments' tag, and already altered tracks
+# will not be re-fiddled, so running this multiple times shouldn't hurt)
 #
 # === Dependencies:
 #
 # * sudo port install soundtouch ruby rb-rubygems
 # ** (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
-# * sudo gem install activerecord activesupport rb-appscript
+# * sudo gem install activesupport rb-appscript
 #
 # === Install:
 # 
 # Put this somewhere sensible (like ~/bin/change_tempo) and run it regularly, by, say:
 #   crontab -e
-#   15 3 * * * ~/bin/change_tempo
+#   15 3 * * * ~/bin/change_tempo --speedup 20 --playlist new-podcasts > ~/log/change_tempo.log
 
 %w[rubygems activesupport appscript].each {|l| require l }
 
@@ -124,9 +125,9 @@ class Podcast
   protected
 
   def to_slow_wav
-    # lame --decode <mp3> <slow-wav>
+    # lame --silent --decode <mp3> <slow-wav>
     filename = tempfile_path("slow.wav")
-    cmd("lame --decode #{safe_path} #{filename}")
+    cmd("lame --silent --decode #{safe_path} #{filename}")
     return filename
   end
   def soundstretch(wav, cent)
@@ -136,9 +137,9 @@ class Podcast
     return filename
   end
   def to_mp3(wav)
-    # lame -h <fast-wav> <fast-mp3>
+    # lame --silent -h <fast-wav> <fast-mp3>
     filename = tempfile_path("fast.mp3")
-    cmd("lame -h #{wav} #{filename}")
+    cmd("lame --silent -h #{wav} #{filename}")
     return filename
   end
   def copy_tags_to(mp3)
@@ -193,9 +194,6 @@ end
 if __FILE__ == $0
   require 'optparse'
 
-  # TODO: accept command line playlist or speedup
-  # TODO: accept playlist or speedup from $0.yml
-
   opts = OptionParser.new do |opts|
     opts.banner = "Usage: #$0 [options]"
     opts.separator ""
@@ -228,5 +226,5 @@ if __FILE__ == $0
   Podcast.all_slow_podcasts.each do |p|
     p.change_tempo
   end
-  puts Podcast.problems.inspect unless Podcast.problems.empty?
+  $stderr.puts Podcast.problems.inspect unless Podcast.problems.empty?
 end

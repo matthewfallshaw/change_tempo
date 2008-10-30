@@ -114,7 +114,7 @@ class Podcast
       cleanup(fast_wav)
       copy_tags_to(fast_mp3)
       overwrite_self_with(fast_mp3)
-      update_comment_with_speedup
+      update_comment_with_speedup(cent)
     rescue RuntimeError => e
       @@problems << e
     ensure
@@ -152,14 +152,14 @@ class Podcast
     FileUtils.mv(unescape_filename(mp3), path)
     return nil
   end
-  def update_comment_with_speedup
+  def update_comment_with_speedup(cent)
     # update comment and ensure itunes has noticed new file
     # touch iTunes db for changes
     new_comment = ""
     unless slow?
       raise RuntimeError, "Erm... it looks like we've just double sped up a podcast. Sorry about that."
     else
-      new_comment = "{{{change_tempo:+#{speedup}}}}" << self.comment
+      new_comment = "{{{change_tempo:+#{cent}}}}" << self.comment
     end
     self.comment = new_comment
     return new_comment

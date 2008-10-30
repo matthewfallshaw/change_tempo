@@ -2,7 +2,7 @@
 require File.join(File.dirname(__FILE__), '../change_tempo')
 
 describe Podcast do
-  describe "class methods" do
+  describe "class methods:" do
     it "should have a speedup accessor" do
       Podcast.speedup = 53
       Podcast.speedup.should == 53
@@ -19,16 +19,19 @@ describe Podcast do
 
       Podcast.playlist_count.should == 3
     end
+
+    it "should use ruby id3 library (instead of command line tool)"
+
+    describe " #change_tempo" do
+      describe "should abort on errors" do
+        [:to_slow_wav, :soundstretch, :to_mp3, :copy_tags_to].each do |method|
+          it "in #{method}"
+        end
+      end
+    end
   end
 
-  describe "command line arguments" do
-    it "should set Podcast.playlist from playlist"
-    it "should set Podcast.speedup from speedup"
-  end
-
-  describe "config file config" do
-    it "should use config.yml if present and no command line arguments override those settings"
-    it "should not use config.yml if command line arguments override those settings"
+  describe "command line arguments:" do
     it "should set Podcast.playlist from playlist"
     it "should set Podcast.speedup from speedup"
   end

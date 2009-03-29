@@ -16,7 +16,7 @@
 #   crontab -e
 #   15 3 * * * ~/bin/change_tempo --speedup 20 --playlist new-podcasts > ~/log/change_tempo.log
 
-%w[rubygems activesupport appscript].each {|l| require l }
+%w[rubygems activesupport appscript tempfile].each {|l| require l }
 
 class Podcast
 

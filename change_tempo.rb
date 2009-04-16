@@ -6,7 +6,7 @@
 #
 # === Dependencies:
 #
-# * sudo port install soundtouch ruby rb-rubygems
+# * sudo port install soundtouch id3lib ruby rb-rubygems
 # ** (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
 # * sudo gem install activesupport rb-appscript
 #

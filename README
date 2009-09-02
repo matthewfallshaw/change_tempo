@@ -3,6 +3,8 @@ Change Tempo
 
 NOTE: use http://podshifter.com/ - it's much easier than this.
 
+[on OSX]
+
 Increase the tempo of all tracks in the 'Podcasts' playlist in iTunes
 (update state is stored in the mp3 'comments' tag, and already altered tracks
 will not be re-fiddled, so running this multiple times shouldn't hurt)

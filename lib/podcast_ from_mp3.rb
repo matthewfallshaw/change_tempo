@@ -14,7 +14,7 @@ class PodcastFromMp3 < Podcast
     tag.title
   end
   def comment
-    tag.comment
+    tag.comment || ""
   end
   def comment=(value)
     tag.comment = value

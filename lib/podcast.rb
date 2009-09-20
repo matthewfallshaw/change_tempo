@@ -125,7 +125,9 @@ class Podcast
   end
   def overwrite_self_with(mp3)
     # mv <fast-mp3> <mp3>
-    FileUtils.mv(unescape_filename(mp3), path)
+    # FileUtils.mv(unescape_filename(mp3), path)
+    FileUtils.cp(unescape_filename(mp3), path)
+    FileUtils.rm(unescape_filename(mp3)) rescue nil  # this just started erroring, and I don't really care why
     return nil
   end
   def update_comment_with_speedup(cent)

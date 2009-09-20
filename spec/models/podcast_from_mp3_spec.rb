@@ -12,6 +12,10 @@ describe PodcastFromMp3 do
       p = PodcastFromMp3.new(File.join(File.dirname(__FILE__), "../fixtures/Silence.mp3"))
       p.name.should == "Shhh"
     end
+    it "should infer name from file tags when file includes a space" do
+      p = PodcastFromMp3.new(File.join(File.dirname(__FILE__), "../fixtures/Silence with space.mp3"))
+      p.name.should == "Shhh"
+    end
     it "should infer comment from file tags" do
       p = PodcastFromMp3.new(File.join(File.dirname(__FILE__), "../fixtures/Silence.mp3"))
       p.comment.should == "A comment."

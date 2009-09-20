@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
 %w[rubygems activesupport appscript tempfile].each {|l| require l }
-Dir[File.join(File.dirname(__FILE__), "lib", "*")].each { |l| require l }
+file = __FILE__
+file = File.expand_path(File.readlink(file), File.dirname(file)) while File.symlink?(file)
+Dir[File.join(File.dirname(file), "lib", "*")].each { |l| require l }
 
 if __FILE__ == $0
   require 'optparse'

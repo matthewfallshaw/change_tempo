@@ -103,7 +103,14 @@ class Podcast
   def to_slow_wav
     # lame --silent --decode <mp3> <slow-wav>
     filename = tempfile_path("slow.wav")
-    cmd("lame --silent --decode #{safe_path} #{filename}")
+    File.open(path, 'r') do |f|
+      case
+      when f.stat.size > 200,000,000
+        cmd("ffmpeg -i #{safe_path} -f wav #{filename}")
+      else
+        cmd("lame --silent --decode #{safe_path} #{filename}")
+      end
+    end
     return filename
   end
   def soundstretch(wav, cent)

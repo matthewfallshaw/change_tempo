@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-%w[rubygems activesupport appscript tempfile].each {|l| require l }
+%w[rubygems active_support appscript tempfile].each {|l| require l }
 file = __FILE__
 file = File.expand_path(File.readlink(file), File.dirname(file)) while File.symlink?(file)
 Dir[File.join(File.dirname(file), "lib", "*")].each { |l| require l }

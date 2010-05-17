@@ -104,12 +104,7 @@ class Podcast
     # lame --silent --decode <mp3> <slow-wav>
     filename = tempfile_path("slow.wav")
     File.open(path, 'r') do |f|
-      case
-      when f.stat.size > 200,000,000
-        cmd("ffmpeg -i #{safe_path} -f wav #{filename}")
-      else
-        cmd("lame --silent --decode #{safe_path} #{filename}")
-      end
+      cmd("lame --silent --decode #{safe_path} #{filename}")
     end
     return filename
   end

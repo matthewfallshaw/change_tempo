@@ -52,7 +52,7 @@ class Podcast
   # Instance methods
 
   def initialize(podcast_ref_or_file_path, speedup = self.speedup)
-    raise "Don't. Raise a subclass."
+    raise "You're trying to call #{self.class.to_s}#new. Don't. You want one of my subclasses."
   end
   
   # Attributes

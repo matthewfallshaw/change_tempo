@@ -27,7 +27,10 @@ if __FILE__ == $0
     begin
       opts.parse!(ARGV)
       
-      raise "Missing JOB(s)." unless ARGV.length >= 1
+
+      unless ARGV.length >= 1
+        puts opts
+      end
       ARGV.each do |job|
         Podcast.process(job)
       end

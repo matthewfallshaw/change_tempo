@@ -1,11 +1,12 @@
 class Podcast
 
-  @@problems = []
   cattr_reader :problems
   cattr_accessor :speedup, :playlist, :file
 
+  @@problems = []
   self.speedup ||= 25
   self.playlist ||= "Podcasts"
+
   class << self
     def iTunes
       @itunes ||= Appscript.app("iTunes")
@@ -30,6 +31,7 @@ class Podcast
         PodcastFromMp3.new(job).change_tempo
       else
         puts "Running with playlist:#{Podcast.playlist} (#{Podcast.playlist_count} mp3s) and speedup:#{Podcast.speedup}..."
+        puts "      (speedup #{Podcast.speedup} means moving the audio to #{Podcast.speedup + 100}% of it's normal speed)"
 
         Podcast.playlist = job
         Podcast.all_slow_podcasts.each do |p|

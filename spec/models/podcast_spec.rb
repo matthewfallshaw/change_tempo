@@ -36,6 +36,17 @@ describe Podcast do
 
   describe "instance methods:" do
 
+    Podcast.subclasses.each do |klass|
+    #[PodcastFromMp3, PodcastFromRef].each do |klass|
+      describe "#{klass}#speedup" do
+        it "should inherit from class#speedup without argument" do
+          Podcast.speedup = 42
+          p = klass.new(:ref_or_file)
+          p.speedup.should == 42
+        end
+      end
+    end
+
   end
 
 end

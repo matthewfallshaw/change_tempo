@@ -2,7 +2,7 @@
 
 %w[rubygems appscript tempfile].each {|l| require l }
 gem 'activesupport', '2.3.8'
-require 'activesupport'
+require 'active_support'
 
 file = __FILE__
 file = File.expand_path(File.readlink(file), File.dirname(file)) while File.symlink?(file)
@@ -19,8 +19,11 @@ if __FILE__ == $0
     opts.separator "updates them."
     opts.separator ""
     opts.separator "Specific options:"
-    opts.on("-s", "--speedup TEMPO", Integer, "Increase tempo by TEMPO (as a percentage)") do |c|
+    opts.on("-s", "--speedup TEMPO", Integer, "Increase tempo by TEMPO (as a percentage).") do |c|
       Podcast.speedup = c
+    end
+    opts.on("-q", "--quiet", "Do not log messages to standard output.") do |c|
+      Podcast.quiet = true
     end
     opts.on_tail("-h", "--help", "Show this message") do
       puts opts
@@ -39,9 +42,9 @@ if __FILE__ == $0
       end
       $stderr.puts Podcast.problems.inspect unless Podcast.problems.empty?
     rescue OptionParser::InvalidOption => e
-      puts e.message
-      puts
-      puts opts
+      $stderr.puts e.message
+      $stderr.puts
+      $stderr.puts opts
       exit
     end
   end

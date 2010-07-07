@@ -1,7 +1,7 @@
 class Podcast
 
   cattr_reader :problems
-  cattr_accessor :speedup, :playlist, :file
+  cattr_accessor :speedup, :playlist, :file, :quiet
 
   @@problems = []
   self.speedup ||= 25
@@ -26,12 +26,12 @@ class Podcast
     
     def process(job)
       if File.exist?(job)
-        puts "Shifting file:#{job} with speedup:#{Podcast.speedup}..."
+        log "Shifting file:#{job} with speedup:#{Podcast.speedup}..."
 
         PodcastFromMp3.new(job).change_tempo
       else
-        puts "Running with playlist:#{Podcast.playlist} (#{Podcast.playlist_count} mp3s) and speedup:#{Podcast.speedup}..."
-        puts "      (speedup #{Podcast.speedup} means moving the audio to #{Podcast.speedup + 100}% of it's normal speed)"
+        log "Running with playlist:#{Podcast.playlist} (#{Podcast.playlist_count} mp3s) and speedup:#{Podcast.speedup}..."
+        log "      (speedup #{Podcast.speedup} means moving the audio to #{Podcast.speedup + 100}% of it's normal speed)"
 
         Podcast.playlist = job
         Podcast.all_slow_podcasts.each do |p|
@@ -48,6 +48,9 @@ class Podcast
       rescue Appscript::CommandError
         []
       end
+    end
+    def log(message)
+      puts message unless quiet
     end
   end
 
@@ -166,8 +169,8 @@ class Podcast
     filename.gsub(/\\/,'')
   end
   def cmd(command_string)
-    puts command_string
-    puts `#{command_string}`
+    log command_string
+    log `#{command_string}`
     exitstatus = $?.exitstatus
     raise(RuntimeError, $?) unless exitstatus == 0
   end

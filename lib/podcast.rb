@@ -40,6 +40,10 @@ class Podcast
       end
     end
 
+    def log(message)
+      puts message unless quiet
+    end
+
     protected
 
     def all_podcast_refs(playlist = self.playlist)
@@ -48,9 +52,6 @@ class Podcast
       rescue Appscript::CommandError
         []
       end
-    end
-    def log(message)
-      puts message unless quiet
     end
   end
 
@@ -173,5 +174,8 @@ class Podcast
     log `#{command_string}`
     exitstatus = $?.exitstatus
     raise(RuntimeError, $?) unless exitstatus == 0
+  end
+  def log(message)
+    self.class.log message
   end
 end

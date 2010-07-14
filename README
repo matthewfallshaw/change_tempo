@@ -13,7 +13,7 @@ will not be re-fiddled, so running this multiple times shouldn't hurt)
 
 * sudo port install lame soundtouch id3lib ruby rb-rubygems
 ** (you can get MacPorts from http://www.macports.org/, which'll make the port command work)
-* sudo gem install activesupport rb-appscript
+* sudo gem install activesupport rb-appscript id3lib-ruby
 
 === Install:
 

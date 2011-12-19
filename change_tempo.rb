@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 %w[rubygems appscript tempfile].each {|l| require l }
-gem 'activesupport', '2.3.8'
+gem 'activesupport', '2.3.14'
 require 'active_support'
 
 file = __FILE__

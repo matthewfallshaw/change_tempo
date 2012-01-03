@@ -117,8 +117,8 @@ class Podcast
   def soundstretch(wav, cent)
     # soundstretch <slow-wav> <fast-wav> -tempo=+70
     filename = tempfile_path("fast.wav")
-    cmd("soundstretch #{wav} #{filename} -tempo=+#{cent} 2>/dev/null")  # sucks to redirect stderr
-                                                                        # but soundstretch always emits
+    cmd("soundstretch #{wav} #{filename} -speech -tempo=+#{cent} 2>/dev/null")  # sucks to redirect stderr
+                                                                                # but soundstretch always emits
     return filename
   end
   def to_mp3(wav)

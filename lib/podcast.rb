@@ -108,6 +108,7 @@ class Podcast
 
   def to_slow_wav
     # lame --silent --decode <mp3> <slow-wav>
+    # ffmpeg -loglevel quiet -i #{safe_path} -f wav #{filename}
     filename = tempfile_path("slow.wav")
     File.open(path, 'r') do |f|
       cmd("lame --silent --decode #{safe_path} #{filename}")
@@ -123,6 +124,7 @@ class Podcast
   end
   def to_mp3(wav)
     # lame --silent -h <fast-wav> <fast-mp3>
+    # ffmpeg -i #{wav} -f mp3 #{filename}
     filename = tempfile_path("fast.mp3")
     cmd("lame --silent -h #{wav} #{filename}")
     return filename
@@ -162,7 +164,7 @@ class Podcast
   private
 
   def tempfile_path(ext)
-    escape_filename(Tempfile.new("#{object_id}_#{ext}").path)
+    escape_filename(Tempfile.new(["#{object_id}", "#{ext}"]).path)
   end
   def escape_filename(filename)
     filename.gsub(/(\W)/,'\\\\\1')

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
 gem 'activesupport', '2.3.14'
 require 'active_support'
 

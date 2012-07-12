@@ -1,4 +1,6 @@
 require 'appscript'
+require File.dirname(__FILE__) + '/sdefToRBAppscriptModule'
+Tunes = SDEFParser.makeModule("/Applications/iTunes.app")
 
 class PodcastFromRef < Podcast
 

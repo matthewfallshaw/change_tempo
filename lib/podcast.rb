@@ -1,3 +1,5 @@
+%w[rubygems tempfile].each {|l| require l }
+
 class Podcast
 
   cattr_reader :problems
@@ -8,21 +10,6 @@ class Podcast
   self.playlist ||= "Podcasts"
 
   class << self
-    def iTunes
-      @itunes ||= Appscript.app("iTunes")
-    end
-    def count
-      all_podcast_refs.size
-    end
-    def all_podcasts(playlist = self.playlist)
-      all_podcast_refs(playlist).collect {|p| PodcastFromRef.new(p) }.select {|p| p.mp3? }
-    end
-    def all_slow_podcasts(playlist = self.playlist)
-      all_podcasts(playlist).select {|p| p.slow? }
-    end
-    def playlist_count
-      all_podcast_refs.size
-    end
     
     def process(job)
       if File.exist?(job)
@@ -30,11 +17,10 @@ class Podcast
 
         PodcastFromMp3.new(job).change_tempo
       else
-        log "Running with playlist:#{Podcast.playlist} (#{Podcast.playlist_count} mp3s) and speedup:#{Podcast.speedup}..."
-        log "      (speedup #{Podcast.speedup} means moving the audio to #{Podcast.speedup + 100}% of it's normal speed)"
-
-        Podcast.playlist = job
-        Podcast.all_slow_podcasts.each do |p|
+        PodcastFromRef.playlist = job
+        log "Running with playlist:#{PodcastFromRef.playlist} (#{PodcastFromRef.playlist_count} mp3s) and speedup:#{PodcastFromRef.speedup}..."
+        log "      (speedup #{PodcastFromRef.speedup} means moving the audio to #{PodcastFromRef.speedup + 100}% of it's normal speed)"
+        PodcastFromRef.all_slow_podcasts.each do |p|
           p.change_tempo
         end
       end
@@ -44,15 +30,6 @@ class Podcast
       puts message unless quiet
     end
 
-    protected
-
-    def all_podcast_refs(playlist = self.playlist)
-      begin
-        iTunes.playlists[playlist].tracks.get.select {|p| p.exists }
-      rescue Appscript::CommandError
-        []
-      end
-    end
   end
 
   # Instance methods

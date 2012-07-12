@@ -2,6 +2,5 @@
 require File.join(File.dirname(__FILE__), '../change_tempo')
 
 describe "command line arguments:" do
-  it "should set Podcast.playlist from playlist"
   it "should set Podcast.speedup from speedup"
 end

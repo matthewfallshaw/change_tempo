@@ -1,12 +1,11 @@
 #!/usr/bin/env ruby
 
-%w[rubygems appscript tempfile].each {|l| require l }
 gem 'activesupport', '2.3.14'
 require 'active_support'
 
 file = __FILE__
 file = File.expand_path(File.readlink(file), File.dirname(file)) while File.symlink?(file)
-Dir[File.join(File.dirname(file), "lib", "*")].each { |l| require l }
+Dir[File.join(File.dirname(file), 'lib', '*')].each { |l| require l }
 
 if __FILE__ == $0
   require 'optparse'

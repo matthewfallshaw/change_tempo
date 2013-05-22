@@ -20,6 +20,6 @@ $ sudo gem install activesupport rb-appscript id3lib-ruby
 Put this somewhere sensible (like ~/bin/change_tempo) and run it regularly, by, say:
 ```
   crontab -e
-  15 3 * * * ~/bin/change_tempo.rb --speedup 20 --playlist new-podcasts > ~/log/change_tempo.log
+  15 3 * * * ~/bin/change_tempo --speedup 20 --playlist new-podcasts > ~/log/change_tempo.log
 ```
 

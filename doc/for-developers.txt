@@ -1,0 +1,29 @@
+
+Test : with 1 file
+===================
+    To easily test the result of your changes, adapt and use the script below :
+    (you will need a small sample mp3 file)
+
+    file: t
+        cp samples/source-before.mp3 source.mp3
+        echo "BEFORE ---------------------------------------------------"
+        id3info source.mp3
+        echo "----------------------------------------------------------"
+        ./change_tempo.rb --speedup 80 source.mp3 > log/change_tempo.log
+        echo "AFTER ----------------------------------------------------"
+        id3info source.mp3
+        echo "----------------------------------------------------------"
+        play source.mp3
+
+    run with
+
+      $ chmod +x t
+      $ ./t
+
+
+Test : with 1 playlist
+======================
+step 1 :
+    create 1 iTune playlist named 'changetempo', and load it with a small sample file.
+step 2 :
+    $ ./change_tempo.rb --speedup 80 changetempo > log/change_tempo.log

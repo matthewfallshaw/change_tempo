@@ -63,61 +63,50 @@ class Podcast
   end
 
   def change_tempo(cent = self.speedup)
-    begin
-      raise(RuntimeError, "Not an mp3 - aborting.") unless mp3?
-      raise(RuntimeError, "Already fast - aborting.") unless slow?
-      slow_wav = to_slow_wav
-      fast_wav = soundstretch(slow_wav, cent)
-      cleanup(slow_wav)
-      fast_mp3 = to_mp3(fast_wav)
-      cleanup(fast_wav)
-      copy_tags_to(fast_mp3)
-      overwrite_self_with(fast_mp3)
-      update_comment_with_speedup(cent)
-    rescue RuntimeError => e
-      @@problems << e
-    ensure
-      cleanup(slow_wav, fast_wav, fast_mp3)
+    assert_file_is_mp3!
+    assert_file_not_already_processed!
+
+    new_tempo = 1 + (cent/100.0)
+    source_file = unescape_filename safe_path
+
+    # use plain unix path, to solve problems with some iTunes playlist
+    source_file_2 = unescape_filename tempfile_path("slow.mp3")
+    FileUtils.cp(source_file, source_file_2)
+    temp_file     = unescape_filename tempfile_path("slow2.mp3")
+
+    process_1_file(source_file_2, temp_file, new_tempo)
+    overwrite_source_file(temp_file, source_file)
+    update_comment_with_speedup(cent)
+  rescue RuntimeError => e
+    @@problems << e
+  ensure
+      cleanup(temp_file)
+  end
+
+  private
+
+  def assert_file_is_mp3!
+    raise(RuntimeError, "Not an mp3 - aborting.") unless mp3?
+  end
+  def assert_file_not_already_processed!
+    raise(RuntimeError, "Already fast - aborting.") unless slow?
+  end
+
+
+  def process_1_file(source, dest, new_tempo)
+    File.open(path, 'r') do |f|
+      cmd "sox #{source} #{dest} tempo -s #{new_tempo}"
+      cmd "id3cp #{safe_path} #{dest}"
     end
+  end
+
+  def overwrite_source_file(temp_file, source_file)
+    FileUtils.cp(temp_file, source_file)
+    FileUtils.rm(unescape_filename(temp_file))
   end
 
   protected
 
-  def to_slow_wav
-    # lame --silent --decode <mp3> <slow-wav>
-    # ffmpeg -loglevel quiet -i #{safe_path} -f wav #{filename}
-    filename = tempfile_path("slow.wav")
-    File.open(path, 'r') do |f|
-      cmd("lame --silent --decode #{safe_path} #{filename}")
-    end
-    return filename
-  end
-  def soundstretch(wav, cent)
-    # soundstretch <slow-wav> <fast-wav> -tempo=+70
-    filename = tempfile_path("fast.wav")
-    cmd("soundstretch #{wav} #{filename} -speech -tempo=+#{cent} 2>/dev/null")  # sucks to redirect stderr
-                                                                                # but soundstretch always emits
-    return filename
-  end
-  def to_mp3(wav)
-    # lame --silent -h <fast-wav> <fast-mp3>
-    # ffmpeg -i #{wav} -f mp3 #{filename}
-    filename = tempfile_path("fast.mp3")
-    cmd("lame --silent -h #{wav} #{filename}")
-    return filename
-  end
-  def copy_tags_to(mp3)
-    # id3cp <mp3> <fast-mp3>
-    cmd("id3cp #{safe_path} #{mp3}")
-    return nil
-  end
-  def overwrite_self_with(mp3)
-    # mv <fast-mp3> <mp3>
-    # FileUtils.mv(unescape_filename(mp3), path)
-    FileUtils.cp(unescape_filename(mp3), path)
-    FileUtils.rm(unescape_filename(mp3)) rescue nil  # this just started erroring, and I don't really care why
-    return nil
-  end
   def update_comment_with_speedup(cent)
     # update comment and ensure itunes has noticed new file
     # touch iTunes db for changes

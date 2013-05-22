@@ -15,13 +15,6 @@ describe Podcast do
     end
     it "should process single mp3 files"
 
-    describe " #change_tempo" do
-      describe "should abort on errors" do
-        [:to_slow_wav, :soundstretch, :to_mp3, :copy_tags_to].each do |method|
-          it "in #{method}"
-        end
-      end
-    end
   end
 
   describe "instance methods:" do

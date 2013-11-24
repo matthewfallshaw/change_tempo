@@ -44,7 +44,7 @@ class Podcast
   end
   def mp3?
     begin
-      File.extname(path) == ".mp3"
+      File.extname(path).downcase == ".mp3"
     rescue Appscript::CommandError, AE::MacOSError => e
       false
     end
